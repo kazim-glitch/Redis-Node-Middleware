@@ -51,7 +51,7 @@ const reqdata = function(req,res,next){
 
         
     
-        redisclient.rPush('my_key',req1,res1,function(err,reply){
+        redisclient.rPush('my_key',req1,function(err,reply){
         console.log(reply);    
         })    
     }
@@ -59,7 +59,7 @@ const reqdata = function(req,res,next){
        catch(error) {
         console.error(error);
       } 
-      resdata(correlationId) ;
+      //resdata(correlationId) ;
       /*finally {
         res.send("Request data succes"); 
         
@@ -76,7 +76,7 @@ const resdata = function(req,res){
         var response = {
             body : res.body, 
             headers : res.header,
-            correlationId: request.correlationId
+            correlationId: reqdata.correlationId
         
         
         
