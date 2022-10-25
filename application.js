@@ -89,7 +89,7 @@ const resdata = function(req,res){
                 console.log(reply);    
                 })  
 
-
+            res.send("API lifecycle complete");
         
     }
 
@@ -102,7 +102,7 @@ const resdata = function(req,res){
 
 app.use(reqdata) ; 
 
-app.use(resdata) ; 
+
 
 
 app.get('/', function (req, res) {
@@ -133,7 +133,7 @@ app.get('/redis',function(req,res){
        
     });
 
-
+    app.use(resdata) ; 
 
 app.listen(8081, function () {
 
