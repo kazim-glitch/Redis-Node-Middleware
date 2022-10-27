@@ -1,0 +1,17 @@
+{   
+    "Portal_id": "32",
+    "entityValue":"4",
+    "roleId": "pd21",
+    "name": "kazim",
+    "permissions": [
+      "sudo"
+    ],
+    "iS_ADMIN": 0,
+    "maskingProfileId": "a",
+    
+        "responseCode": "200",
+        "responseDesc": "User Portal",
+        "responseObj": "portal"
+      
+  }
+  

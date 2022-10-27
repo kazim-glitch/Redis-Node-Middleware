@@ -110,6 +110,35 @@ app.use(function(req, res, next){
   });
 
 
+    app.post('/api/v1/portals/32/entities/4/roles',function(req,res,next){
+        var data = fs.readFileSync('portal.json')
+        var myObject= JSON.parse(data);
+        res.data1= myObject; 
+        console.log('sending data');
+
+        var res_type = "Response"
+
+
+        var response = {
+            
+            
+            correlationId: req.correlationId,
+            body : res.data1, 
+            method:res.method,
+            status:res_type,
+            headers : res.headers,
+            Code:res.statusCode
+            }
+            
+            res.data2 = JSON.stringify(response)
+            
+        
+        res.send("Req and Response data stored in Elastic search");
+        
+        next(); 
+    });
+
+
     app.post('/api/v1/Benificiaries',function(req,res,next){
       
         var data = fs.readFileSync('data.json');
