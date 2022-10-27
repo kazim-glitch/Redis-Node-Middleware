@@ -1,12 +1,10 @@
 
 const redis = require("redis");
 const redisclient = redis.createClient();
+const fs = require('fs');
 
-// var express = require("express");
-// var app = express();
-// app.listen(3000, () => {
-//  console.log("Server running on port 3000");
-// });
+var uuid = require('uuid');
+
 
 (async () => {
     await redisclient.connect();
@@ -16,41 +14,33 @@ redisclient.on("ready", () => {
     console.log("Connected to Redis Client!");
 });
 
-/*console.log("Connecting to the Redis");
-  
-
-  
-redisclient.on("error", (err) => {
-    console.log("Error in the Connection");
-});*/
-
-
-
-// redisclient.lRange('my_key',0,-1,function(err,reply){
-//     console.log(reply); 
-// })
-
 var express = require('express');
 const { response } = require("express");
+const bodyParser = require('body-parser');
 
 var app = express();
 
 
 const reqdata = function(req,res,next){
 
+    var req_type = "Request"
+    req.correlationId = uuid.v1();
     try {
         console.log(req.headers)
         var request = {
-            correlationId : Math.random(),
+            correlationId:req.correlationId,
             body: req.body,
+            status:req_type,
             headers: req.headers,
-            url: req.url
+            url: req.url,
+            method:req.method
         }
+
         var req1 = JSON.stringify(request);
         console.log(req1);
 
         
-    
+        
         redisclient.rPush('my_key',req1,function(err,reply){
         console.log(reply);    
         })    
@@ -58,7 +48,9 @@ const reqdata = function(req,res,next){
 
        catch(error) {
         console.error(error);
-      } 
+      }
+      
+      
       //resdata(correlationId) ;
       /*finally {
         res.send("Request data succes"); 
@@ -68,40 +60,18 @@ const reqdata = function(req,res,next){
     
 }
 
+app.use(bodyParser.urlencoded({ extended: false }))
 
-const resdata = function(req,res){
-    
-    
-    try {
-        var response = {
-            body : res.body, 
-            headers : res.header,
-            correlationId: reqdata.correlationId
-        
-        
-        
-                
-            }
-        
-            var res1 = JSON.stringify(response)
-            console.log(res1)
-            redisclient.rPush('my_key',res1,function(err,reply){
-                console.log(reply);    
-                })  
-
-            res.send("API lifecycle complete");
-        
-    }
-
-       catch(error) {
-        console.error(error);
-      }
-
-}
+app.use(bodyParser.json())
 
 
-app.use(reqdata) ; 
 
+app.use(reqdata,function(req,res,next){
+
+    console.log("Sending and pushing request data and headers"); 
+    next(); 
+}) ; 
+//app.use(express.json())
 
 
 
@@ -121,19 +91,74 @@ res.send('Simple Web Application is UP');
 
 
 
-
-
-
-
-app.get('/redis',function(req,res){
-
-    
-      res.send("Req and Response data stored in Elastic search") ;
-    
+app.use(function(req, res, next){
+    res.on('finish', function(){
+          console.log("~~~~~~~~~~~~~~RESPONSE~~~~~~~~~~~~~~~~");
+        //console.log(res.data1);
        
+        console.log(res.data2)
+
+        
+
+        redisclient.rPush('my_key',res.data2,function(err,reply){
+        console.log(reply) ; 
+        })
     });
 
-    app.use(resdata) ; 
+
+    next();
+  });
+
+
+    app.post('/api/v1/Benificiaries',function(req,res,next){
+      
+        var data = fs.readFileSync('data.json');
+        var myObject= JSON.parse(data);
+    
+        res.data1= myObject; 
+        console.log('sending data');
+
+        var res_type = "Response"
+
+
+        var response = {
+            
+            
+            correlationId: req.correlationId,
+            body : res.data1, 
+            method:res.method,
+            status:res_type,
+            headers : res.headers,
+            Code:res.statusCode
+            }
+            
+            res.data2 = JSON.stringify(response)
+            
+        
+        res.send("Req and Response data stored in Elastic search");
+        
+        next(); 
+    
+    }); 
+
+    app.get('/api/v1/Benificiaries',function(req,res,next){
+        var data = fs.readFileSync('data.json');
+        var myObject= JSON.parse(data);
+        res.data1= myObject; 
+        var response = {
+            correlationId: req.correlationId,
+            body:res.data1,
+            headers : res.headers,
+            Code:res.statusCode,
+            method:res.method
+            }
+        res.data2 = JSON.stringify(response)
+        res.send("Benificiaries details"); 
+        next(); 
+    })
+
+
+  //  app.use(resdata) ; 
 
 app.listen(8081, function () {
 
