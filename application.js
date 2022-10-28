@@ -95,7 +95,6 @@ app.use(function(req, res, next){
     res.on('finish', function(){
           console.log("~~~~~~~~~~~~~~RESPONSE~~~~~~~~~~~~~~~~");
         //console.log(res.data1);
-       
         console.log(res.data2)
 
         
@@ -203,6 +202,28 @@ app.use(function(req, res, next){
         next(); 
     
     }); 
+
+    app.get('/api/v1/DigitalMarketing/Modules',(req,res,next)=>{
+        var data = fs.readFileSync('./Modules.json');
+        var myObject= JSON.parse(data);
+        res.data1= myObject; 
+        var res_type = "Response"
+
+        var response = {
+            correlationId: req.correlationId,
+            body:res.data1,
+            type:res_type,
+            headers : res.headers,
+            Code:res.statusCode,
+            method:res.method
+            }
+        res.data2 = JSON.stringify(response)
+        
+        
+        res.end(res.body)
+        next(); 
+
+    })
 
     app.get('/api/v1/Benificiaries',function(req,res,next){
         var data = fs.readFileSync('data.json');
