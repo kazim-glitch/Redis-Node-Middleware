@@ -30,7 +30,7 @@ const reqdata = function(req,res,next){
         var request = {
             correlationId:req.correlationId,
             body: req.body,
-            status:req_type,
+            type:req_type,
             headers: req.headers,
             url: req.url,
             method:req.method
@@ -103,6 +103,8 @@ app.use(function(req, res, next){
         redisclient.rPush('my_key',res.data2,function(err,reply){
         console.log(reply) ; 
         })
+
+       // res.end(res.data2)
     });
 
 
@@ -125,7 +127,7 @@ app.use(function(req, res, next){
             correlationId: req.correlationId,
             body : res.data1, 
             method:res.method,
-            status:res_type,
+            type:res_type,
             headers : res.headers,
             Code:res.statusCode
             }
@@ -133,10 +135,42 @@ app.use(function(req, res, next){
             res.data2 = JSON.stringify(response)
             
         
-        res.send("Req and Response data stored in Elastic search");
-        
+        //res.send("Req and Response data stored in Elastic search");
+        res.end(res.data2)
         next(); 
     });
+
+
+    app.post('/api/v1/recover/password',(req,res,next)=>{
+      
+            var data = fs.readFileSync('./recover-password.json');
+            var myObject= JSON.parse(data);
+        
+            res.data1= myObject; 
+            console.log('sending data');
+    
+            var res_type = "Response"
+    
+    
+            var response = {
+                
+                
+                correlationId: req.correlationId,
+                body : res.data1, 
+                method:res.method,
+                type:res_type,
+                headers : res.headers,
+                Code:res.statusCode
+                }
+                
+                res.data2 = JSON.stringify(response)
+                
+            
+            res.end(res.data2)
+            
+            next(); 
+        
+            });
 
 
     app.post('/api/v1/Benificiaries',function(req,res,next){
@@ -156,7 +190,7 @@ app.use(function(req, res, next){
             correlationId: req.correlationId,
             body : res.data1, 
             method:res.method,
-            status:res_type,
+            type:res_type,
             headers : res.headers,
             Code:res.statusCode
             }
@@ -164,7 +198,7 @@ app.use(function(req, res, next){
             res.data2 = JSON.stringify(response)
             
         
-        res.send("Req and Response data stored in Elastic search");
+        res.end(res.data2)
         
         next(); 
     
@@ -182,7 +216,9 @@ app.use(function(req, res, next){
             method:res.method
             }
         res.data2 = JSON.stringify(response)
-        res.send("Benificiaries details"); 
+        
+        
+        res.end(res.data2)
         next(); 
     })
 
